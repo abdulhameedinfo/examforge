@@ -148,6 +148,76 @@ public sealed class Question : BaseEntity
         Touch();
     }
 
+    public void EnsureCanBeModifiedBy(User user)
+    {
+        if (!user.IsActive)
+        {
+            throw new DomainException("Inactive users cannot modify questions.");
+        }
+
+        if (user.Role == UserRole.Admin)
+        {
+            return;
+        }
+
+        if (user.Role == UserRole.Teacher && CreatedById == user.Id)
+        {
+            return;
+        }
+
+        throw new DomainException("You can only modify your own questions.");
+    }
+
+    public void UpdateMcqOptions(McqOptions options)
+    {
+        if (Type != QuestionType.MultipleChoice)
+        {
+            throw new DomainException("MCQ options can only be updated on multiple-choice questions.");
+        }
+
+        McqOptions = options ?? throw new DomainException("MCQ options are required.");
+        Touch();
+    }
+
+    public void UpdateTrueFalseAnswer(bool correctAnswer)
+    {
+        if (Type != QuestionType.TrueFalse)
+        {
+            throw new DomainException("True/false answer can only be updated on true/false questions.");
+        }
+
+        TrueFalseAnswer = correctAnswer;
+        Touch();
+    }
+
+    public void UpdateModelAnswer(string? modelAnswer)
+    {
+        if (Type is not (QuestionType.ShortQuestion or QuestionType.LongQuestion))
+        {
+            throw new DomainException("Model answer can only be updated on short or long questions.");
+        }
+
+        ModelAnswer = ValidateModelAnswer(modelAnswer);
+        Touch();
+    }
+
+    public void ReplaceBlankAnswers(IEnumerable<string> acceptableAnswers)
+    {
+        if (Type != QuestionType.FillInTheBlank)
+        {
+            throw new DomainException("Blank answers can only be updated on fill-in-the-blank questions.");
+        }
+
+        _blankAnswers.Clear();
+        var answers = ValidateBlankAnswers(acceptableAnswers);
+        for (short i = 0; i < answers.Count; i++)
+        {
+            _blankAnswers.Add(QuestionBlankAnswer.Create(this, answers[i], i));
+        }
+
+        Touch();
+    }
+
     private static Question CreateBase(
         Subject subject,
         User createdBy,

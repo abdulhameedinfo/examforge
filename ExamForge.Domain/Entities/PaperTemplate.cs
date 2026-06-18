@@ -1,6 +1,8 @@
 using ExamForge.Domain.Common;
 using ExamForge.Domain.Enums;
 using ExamForge.Domain.Exceptions;
+using ExamForge.Domain.ValueObjects;
+
 namespace ExamForge.Domain.Entities;
 
 /// <summary>
