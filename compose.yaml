@@ -1,0 +1,7 @@
+﻿services:
+  examforge:
+    image: examforge
+    build:
+      context: .
+      dockerfile: ExamForge/Dockerfile
+
