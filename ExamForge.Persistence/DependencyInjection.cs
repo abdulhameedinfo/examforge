@@ -1,4 +1,8 @@
+using ExamForge.Application.Abstractions;
+using ExamForge.Domain.Common;
+using ExamForge.Domain.Entities;
 using ExamForge.Persistence.Context;
+using ExamForge.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +21,9 @@ public static class DependencyInjection
         {
             options.UseNpgsql(connectionString);
         });
+
+        services.AddScoped<IQuestionPoolRepository, QuestionPoolRepository>();
+        services.AddScoped<ISubjectReadRepository, SubjectReadRepository>();
 
         return services;
     }

@@ -1,4 +1,5 @@
 using ExamForge.Domain.Common;
+using ExamForge.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExamForge.Persistence.Context;
@@ -8,6 +9,11 @@ public sealed class ExamForgeDbContext : DbContext
     public ExamForgeDbContext(DbContextOptions<ExamForgeDbContext> options) : base(options)
     {
     }
+
+    public DbSet<User> Users => Set<User>();
+    public DbSet<Subject> Subjects => Set<Subject>();
+    public DbSet<Question> Questions => Set<Question>();
+    public DbSet<QuestionBlankAnswer> QuestionBlankAnswers => Set<QuestionBlankAnswer>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -29,13 +35,29 @@ public sealed class ExamForgeDbContext : DbContext
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         ApplyAuditFields();
+        ApplySoftDeletes();
         return base.SaveChangesAsync(cancellationToken);
     }
 
     public override int SaveChanges()
     {
         ApplyAuditFields();
+        ApplySoftDeletes();
         return base.SaveChanges();
+    }
+
+    private void ApplySoftDeletes()
+    {
+        foreach (var entry in ChangeTracker.Entries<BaseEntity>())
+        {
+            if (entry.State != EntityState.Deleted)
+            {
+                continue;
+            }
+
+            entry.State = EntityState.Modified;
+            entry.Entity.MarkAsDeleted();
+        }
     }
 
     private void ApplyAuditFields()
