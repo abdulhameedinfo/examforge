@@ -1,5 +1,6 @@
 using ExamForge.Domain.Common;
 using ExamForge.Domain.Entities;
+using ExamForge.Persistence.Syncing;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExamForge.Persistence.Context;
@@ -14,6 +15,7 @@ public sealed class ExamForgeDbContext : DbContext
     public DbSet<Subject> Subjects => Set<Subject>();
     public DbSet<Question> Questions => Set<Question>();
     public DbSet<QuestionBlankAnswer> QuestionBlankAnswers => Set<QuestionBlankAnswer>();
+    public DbSet<SyncChangeLogEntry> SyncChangeLogEntries => Set<SyncChangeLogEntry>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

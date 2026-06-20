@@ -3,6 +3,7 @@ using ExamForge.Domain.Common;
 using ExamForge.Domain.Entities;
 using ExamForge.Persistence.Context;
 using ExamForge.Persistence.Repositories;
+using ExamForge.Persistence.Syncing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,6 +25,7 @@ public static class DependencyInjection
 
         services.AddScoped<IQuestionPoolRepository, QuestionPoolRepository>();
         services.AddScoped<ISubjectReadRepository, SubjectReadRepository>();
+        services.AddScoped<ISyncService, SyncService>();
 
         return services;
     }

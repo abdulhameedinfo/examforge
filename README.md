@@ -9,7 +9,7 @@ An offline-first mobile application for building question banks and generating e
 - **Question Bank Management** — Create, organize, and manage questions by subject, topic, or difficulty
 - **Exam Paper Generation** — Generate customized exam papers from your question bank
 - **Offline-First** — Full functionality without an internet connection using local SQLite storage
-- **Auto Sync** — Automatically syncs local data with Supabase cloud when internet is restored
+- **Auto Sync** — Automatically syncs local data with the ASP.NET Core backend when internet is restored
 - **Cross-Platform** — Runs on both Android and iOS
 
 ---
@@ -20,7 +20,7 @@ An offline-first mobile application for building question banks and generating e
 |---|---|
 | Mobile Frontend | React Native |
 | Backend API | .NET |
-| Cloud Database | Supabase (PostgreSQL) |
+| Cloud Database | PostgreSQL |
 | Local Storage | SQLite |
 
 ---
@@ -30,7 +30,7 @@ An offline-first mobile application for building question banks and generating e
 - [Node.js](https://nodejs.org/) (v18+)
 - [React Native CLI](https://reactnative.dev/docs/environment-setup)
 - [.NET SDK](https://dotnet.microsoft.com/download) (v8+)
-- [Supabase Account](https://supabase.com/)
+- PostgreSQL database access
 - Android Studio / Xcode (for emulator/simulator)
 
 ---
@@ -57,15 +57,13 @@ yarn install
 Create a `.env` file in the root directory:
 
 ```env
-SUPABASE_URL=your_supabase_project_url
-SUPABASE_ANON_KEY=your_supabase_anon_key
 API_BASE_URL=http://localhost:5000
 ```
 
 ### 4. Set up the .NET backend
 
 ```bash
-cd backend
+cd ExamForge.Api
 dotnet restore
 dotnet run
 ```
@@ -84,11 +82,11 @@ npx react-native run-ios
 
 ## 🗄️ Database Setup
 
-### Supabase
+### PostgreSQL
 
-1. Create a new project on [Supabase](https://supabase.com/)
-2. Run the SQL migration scripts located in `/database/migrations/`
-3. Copy your project URL and anon key to `.env`
+1. Create a PostgreSQL database
+2. Apply the database migrations used by the ASP.NET Core backend
+3. Set the backend connection string in `appsettings.Development.json`
 
 ### SQLite (Local)
 
@@ -106,7 +104,7 @@ SQLite is configured automatically on first app launch. No additional setup requ
 │   ├── services/         # API & database services
 │   ├── store/            # State management
 │   └── utils/            # Helper functions
-├── backend/              # .NET API project
+├── ExamForge.Api/        # .NET API project
 ├── database/
 │   └── migrations/       # Supabase SQL migrations
 └── README.md
@@ -118,9 +116,10 @@ SQLite is configured automatically on first app launch. No additional setup requ
 
 The app uses a **sync queue** strategy:
 
-1. All changes made offline are saved to SQLite with a `pending` status
-2. When internet connectivity is detected, the sync service pushes queued changes to Supabase via the .NET API
-3. Remote changes are pulled and merged into the local database
+1. All changes made offline are saved to SQLite with local sync metadata such as `IsSynced`, `Version`, and `UpdatedAt`
+2. When internet connectivity is detected, the sync service pushes queued changes to `POST /api/sync/upload`
+3. Remote changes are pulled with `GET /api/sync/download?sinceToken=...` and merged into the local database
+4. The backend uses version-based conflict detection and a server-side change log for incremental pulls
 
 ---
 
