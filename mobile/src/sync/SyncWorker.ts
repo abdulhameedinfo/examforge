@@ -3,25 +3,13 @@ import { QuestionRepository } from '../repositories/QuestionRepository';
 import { SyncQueueRepository } from '../repositories/SyncQueueRepository';
 import { SyncMetaRepository } from '../repositories/SyncMetaRepository';
 import type { SyncChangeDto } from '../types';
+import type { SyncDownloadResponse, SyncUploadResponse } from '../api/syncApi';
 
-type UploadResult = {
-  id: string;
-  entity: string;
-  status: 'ok' | 'conflict' | 'error';
-  newVersion?: number | null;
-  updatedAt?: string | null;
-  serverRecord?: unknown | null;
-  message?: string | null;
-};
+type UploadResult = SyncUploadResponse['results'][number];
 
-type SyncUploadResponse = {
-  results: UploadResult[];
-  serverSyncToken: number;
-};
-
-type SyncDownloadResponse = {
-  changes: SyncChangeDto[];
-  serverSyncToken: number;
+type SyncApi = {
+  upload(deviceId: string, changes: SyncChangeDto[]): Promise<SyncUploadResponse>;
+  download(sinceToken: number): Promise<SyncDownloadResponse>;
 };
 
 export class SyncWorker {
@@ -30,7 +18,10 @@ export class SyncWorker {
   private readonly queue = new SyncQueueRepository();
   private readonly meta = new SyncMetaRepository();
 
-  constructor(private readonly apiBaseUrl: string, private readonly deviceId: string) {}
+  constructor(
+    private readonly syncApi: SyncApi,
+    private readonly deviceId: string,
+  ) {}
 
   async sync(): Promise<void> {
     const pending = await this.queue.listPending();
@@ -44,27 +35,17 @@ export class SyncWorker {
   }
 
   private async uploadPending(pending: Awaited<ReturnType<SyncQueueRepository['listPending']>>): Promise<SyncUploadResponse> {
-    const response = await fetch(`${this.apiBaseUrl}/api/sync/upload`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        deviceId: this.deviceId,
-        changes: pending.map((item) => ({
-          entity: item.entityType,
-          operation: item.operation,
-          id: item.entityLocalId,
-          version: item.baseVersion,
-          updatedAt: new Date().toISOString(),
-          data: item.payloadJson ? JSON.parse(item.payloadJson) : null,
-        })),
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Sync upload failed with HTTP ${response.status}`);
-    }
-
-    return (await response.json()) as SyncUploadResponse;
+    return this.syncApi.upload(
+      this.deviceId,
+      pending.map((item) => ({
+        entity: item.entityType,
+        operation: item.operation,
+        id: item.entityLocalId,
+        version: item.baseVersion,
+        updatedAt: new Date().toISOString(),
+        data: item.payloadJson ? JSON.parse(item.payloadJson) : null,
+      })),
+    );
   }
 
   private async applyUploadResponse(results: UploadResult[]): Promise<void> {
@@ -107,15 +88,7 @@ export class SyncWorker {
 
   private async downloadRemoteChanges(): Promise<void> {
     const sinceToken = await this.meta.getLastSyncToken();
-    const response = await fetch(`${this.apiBaseUrl}/api/sync/download?sinceToken=${sinceToken}`, {
-      method: 'GET',
-    });
-
-    if (!response.ok) {
-      throw new Error(`Sync download failed with HTTP ${response.status}`);
-    }
-
-    const data = (await response.json()) as SyncDownloadResponse;
+    const data = await this.syncApi.download(sinceToken);
     for (const change of data.changes) {
       await this.applyRemoteChange(change);
     }

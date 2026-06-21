@@ -1,28 +1,44 @@
-# React Native Offline Sync
+# React Native Offline Architecture
 
-This folder contains drop-in SQLite schema and TypeScript examples for the offline-first mobile app.
+This folder contains a React Native architecture scaffold for the offline-first Question Bank app.
 
-## Files
+## Structure
 
-- `sqlite/schema.sql` - local tables for `subjects`, `questions`, `sync_queue`, and `sync_meta`
-- `src/db.ts` - SQLite initialization
-- `src/repositories/*` - local persistence helpers
-- `src/services/OfflineMutationService.ts` - write path that saves locally and enqueues sync
-- `src/sync/SyncWorker.ts` - pushes queued changes and pulls server changes
+```text
+src/
+  app/
+    App.tsx
+    bootstrap/
+  api/
+  common/
+  db/
+    migrations/
+  features/
+    questions/
+    subjects/
+    sync/
+  repositories/
+  services/
+  sync/
+  types.ts
+  utils/
+sqlite/
+  schema.sql
+```
 
-## Sync flow
+## Flow
 
-1. Save locally to SQLite.
-2. Add or replace a row in `sync_queue`.
-3. POST queued changes to `POST /api/sync/upload`.
-4. Apply per-record server acknowledgments.
-5. Pull changes from `GET /api/sync/download?sinceToken=...`.
-6. Merge remote changes back into SQLite.
+- Local writes go to SQLite first.
+- Each write also enqueues a sync item.
+- `sync_queue` is the outbox.
+- `sync_meta.last_sync_token` stores the server cursor.
+- `SyncWorker` uploads pending changes, applies acknowledgments, then pulls server changes.
 
-## Notes
+## Core responsibilities
 
-- `local_id` is the device-generated UUID.
-- `server_id` is nullable until the first successful sync.
-- Deletes are soft deletes locally and on the server.
-- `sync_meta.last_sync_token` stores the incremental pull cursor.
+- `repositories/` owns SQLite access.
+- `services/` owns offline-first mutations.
+- `sync/` owns upload and download orchestration.
+- `features/*Store` holds in-memory state for screens.
+- `api/` owns HTTP calls to the ASP.NET Core backend.
 
