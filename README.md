@@ -8,6 +8,7 @@ An offline-first mobile application for building question banks and generating e
 
 - **Question Bank Management** — Create, organize, and manage questions by subject, topic, or difficulty
 - **Exam Paper Generation** — Generate customized exam papers from your question bank
+- **PDF Export** — Download generated papers as professionally formatted QuestPDF documents
 - **Offline-First** — Full functionality without an internet connection using local SQLite storage
 - **Auto Sync** — Automatically syncs local data with the ASP.NET Core backend when internet is restored
 - **Cross-Platform** — Runs on both Android and iOS
@@ -120,6 +121,11 @@ The app uses a **sync queue** strategy:
 2. When internet connectivity is detected, the sync service pushes queued changes to `POST /api/sync/upload`
 3. Remote changes are pulled with `GET /api/sync/download?sinceToken=...` and merged into the local database
 4. The backend uses version-based conflict detection and a server-side change log for incremental pulls
+
+## 📄 PDF Export
+
+The API exposes `POST /papers/pdf` to turn a generated paper model into a downloadable PDF file.
+It uses QuestPDF with a structured header, grouped question sections, and page numbering.
 
 ---
 

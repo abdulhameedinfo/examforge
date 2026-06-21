@@ -2,8 +2,11 @@ using ExamForge.Api.Extensions;
 using ExamForge.Application;
 using ExamForge.Infrastructure;
 using ExamForge.Persistence;
+using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
+
+QuestPDF.Settings.License = LicenseType.Community;
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
