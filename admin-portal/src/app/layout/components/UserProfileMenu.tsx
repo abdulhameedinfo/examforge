@@ -1,9 +1,15 @@
 import { Avatar, Divider, ListItemIcon, Menu, MenuItem, Stack, Typography } from '@mui/material';
 import { type MouseEvent, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ChevronDown, LogOut, Settings2, UserCircle2 } from 'lucide-react';
+import { routePaths } from '../../router/routePaths';
+import { queryClient } from '../../../shared/api/queryClient';
+import { useAuthStore } from '../../../features/auth/store/useAuthStore';
 
 export function UserProfileMenu() {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const navigate = useNavigate();
+  const clearSession = useAuthStore((state) => state.clearSession);
   const open = Boolean(anchorEl);
 
   const handleOpen = (event: MouseEvent<HTMLElement>) => {
@@ -12,6 +18,13 @@ export function UserProfileMenu() {
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleSignOut = () => {
+    clearSession();
+    queryClient.clear();
+    handleClose();
+    navigate(routePaths.login, { replace: true });
   };
 
   return (
@@ -50,7 +63,7 @@ export function UserProfileMenu() {
           Account settings
         </MenuItem>
         <Divider />
-        <MenuItem>
+        <MenuItem onClick={handleSignOut}>
           <ListItemIcon>
             <LogOut size={18} />
           </ListItemIcon>
@@ -60,4 +73,3 @@ export function UserProfileMenu() {
     </>
   );
 }
-

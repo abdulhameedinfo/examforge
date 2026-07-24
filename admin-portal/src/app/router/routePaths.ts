@@ -1,5 +1,8 @@
 export const routePaths = {
   dashboard: '/',
+  login: '/login',
+  forgotPassword: '/forgot-password',
+  resetPassword: '/reset-password/:token',
   teachers: '/teachers',
   subjects: '/subjects',
   classes: '/classes',
