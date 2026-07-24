@@ -12,6 +12,7 @@ import {
   Users,
   Layers3,
 } from 'lucide-react';
+import { matchPath } from 'react-router-dom';
 import { routePaths } from '../router/routePaths';
 
 export type BreadcrumbItem = {
@@ -61,6 +62,11 @@ const breadcrumbMap: Record<string, BreadcrumbItem[]> = {
     { label: 'Question Bank', path: routePaths.questions },
     { label: 'Questions', path: routePaths.questions },
   ],
+  [routePaths.questionCreate]: [
+    { label: 'Dashboard', path: routePaths.dashboard },
+    { label: 'Question Bank', path: routePaths.questions },
+    { label: 'Create Question', path: routePaths.questionCreate },
+  ],
   [routePaths.subjects]: [
     { label: 'Dashboard', path: routePaths.dashboard },
     { label: 'Question Bank', path: routePaths.subjects },
@@ -107,5 +113,30 @@ const breadcrumbMap: Record<string, BreadcrumbItem[]> = {
 };
 
 export function getBreadcrumbsForPath(pathname: string): BreadcrumbItem[] {
+  const dynamicPatterns: Array<{ pattern: string; breadcrumbs: BreadcrumbItem[] }> = [
+    {
+      pattern: routePaths.questionEdit,
+      breadcrumbs: [
+        { label: 'Dashboard', path: routePaths.dashboard },
+        { label: 'Question Bank', path: routePaths.questions },
+        { label: 'Edit Question', path: routePaths.questions },
+      ],
+    },
+    {
+      pattern: routePaths.questionDetails,
+      breadcrumbs: [
+        { label: 'Dashboard', path: routePaths.dashboard },
+        { label: 'Question Bank', path: routePaths.questions },
+        { label: 'Question Details', path: routePaths.questions },
+      ],
+    },
+  ];
+
+  for (const entry of dynamicPatterns) {
+    if (matchPath({ path: entry.pattern, end: true }, pathname)) {
+      return entry.breadcrumbs;
+    }
+  }
+
   return breadcrumbMap[pathname] ?? [{ label: 'Dashboard', path: routePaths.dashboard }];
 }

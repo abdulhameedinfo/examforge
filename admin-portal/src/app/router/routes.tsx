@@ -10,6 +10,9 @@ import { ChaptersPage } from '../../features/chapters/pages/ChaptersPage';
 import { DifficultyLevelsPage } from '../../features/difficultyLevels/pages/DifficultyLevelsPage';
 import { QuestionCategoriesPage } from '../../features/questionCategories/pages/QuestionCategoriesPage';
 import { QuestionsPage } from '../../features/questions/pages/QuestionsPage';
+import { QuestionCreatePage } from '../../features/questions/pages/QuestionCreatePage';
+import { QuestionDetailsPage } from '../../features/questions/pages/QuestionDetailsPage';
+import { QuestionEditPage } from '../../features/questions/pages/QuestionEditPage';
 import { PapersPage } from '../../features/papers/pages/PapersPage';
 import { SyncPage } from '../../features/sync/pages/SyncPage';
 import { UsersPage } from '../../features/users/pages/UsersPage';
@@ -60,6 +63,9 @@ const router = createBrowserRouter([
       { path: routePaths.difficultyLevels.slice(1), element: <DifficultyLevelsPage /> },
       { path: routePaths.questionCategories.slice(1), element: <QuestionCategoriesPage /> },
       { path: routePaths.questions.slice(1), element: <QuestionsPage /> },
+      { path: routePaths.questionCreate.slice(1), element: <QuestionCreatePage /> },
+      { path: routePaths.questionDetails.slice(1), element: <QuestionDetailsPage /> },
+      { path: routePaths.questionEdit.slice(1), element: <QuestionEditPage /> },
       { path: routePaths.papers.slice(1), element: <PapersPage /> },
       { path: routePaths.sync.slice(1), element: <SyncPage /> },
       { path: routePaths.users.slice(1), element: <UsersPage /> },
@@ -76,4 +82,3 @@ const router = createBrowserRouter([
 export function AppRouter() {
   return <RouterProvider router={router} />;
 }
-

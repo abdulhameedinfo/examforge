@@ -1,13 +1,208 @@
-import { EmptyState } from '../../../shared/components/EmptyState';
+import { Alert, Box, Button, Stack, Typography } from '@mui/material';
+import { Eye, Pencil, Trash2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { DataTable } from '../../../shared/components/data-table/DataTable';
 import { PageContainer } from '../../../shared/components/PageContainer';
 import { SectionHeader } from '../../../shared/components/SectionHeader';
+import { routePaths } from '../../../app/router/routePaths';
+import { QuestionListToolbar } from '../components/QuestionListToolbar';
+import { QuestionStatusChip } from '../components/QuestionStatusChip';
+import { QuestionTypeChip } from '../components/QuestionTypeChip';
+import { useQuestionFormOptions, useQuestionsQuery } from '../hooks/useQuestionQueries';
+import { useQuestionListParams } from '../hooks/useQuestionListParams';
 
 export function QuestionsPage() {
+  const navigate = useNavigate();
+  const { query, setPage, setPageSize, setSearch, setFilters, clearFilters } = useQuestionListParams();
+  const questionsQuery = useQuestionsQuery(query);
+  const { subjectsQuery, chaptersQuery, difficultiesQuery, teachersQuery } = useQuestionFormOptions(query.subjectId);
+
+  const rows = questionsQuery.data?.items ?? [];
+
   return (
     <PageContainer>
-      <SectionHeader title="Question Bank" />
-      <EmptyState title="Question bank scaffolded" description="Add search, filters, and table views here." />
+      <SectionHeader
+        title="Question Bank"
+        description="Browse, search, and manage questions with server-side pagination and filters."
+        actions={
+          <Button variant="contained" onClick={() => navigate(routePaths.questionCreate)}>
+            Create Question
+          </Button>
+        }
+      />
+
+      {questionsQuery.error ? (
+        <Alert severity="error">Unable to load questions right now.</Alert>
+      ) : null}
+
+      <DataTable
+        rows={rows}
+        rowKey={(row) => row.id}
+        loading={questionsQuery.isFetching}
+        emptyTitle="No questions found"
+        emptyDescription="Try changing the search or filters."
+        columns={[
+          {
+            key: 'text',
+            header: 'Question',
+            sortKey: 'text',
+            width: '30%',
+            render: (row) => (
+              <Stack spacing={0.5}>
+                <Typography variant="body2" fontWeight={600} noWrap>
+                  {row.text}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Updated {new Date(row.updatedAt).toLocaleDateString()}
+                </Typography>
+              </Stack>
+            ),
+          },
+          {
+            key: 'subject',
+            header: 'Subject',
+            sortKey: 'subjectName',
+            render: (row) => row.subject?.name ?? '-',
+          },
+          {
+            key: 'chapter',
+            header: 'Chapter',
+            sortKey: 'chapterName',
+            render: (row) => row.chapter?.name ?? '-',
+          },
+          {
+            key: 'teacher',
+            header: 'Teacher',
+            sortKey: 'teacherName',
+            render: (row) => row.teacher.fullName,
+          },
+          {
+            key: 'type',
+            header: 'Type',
+            sortKey: 'type',
+            render: (row) => <QuestionTypeChip type={row.type} />,
+          },
+          {
+            key: 'difficulty',
+            header: 'Difficulty',
+            sortKey: 'difficultyName',
+            render: (row) => row.difficulty?.name ?? '-',
+          },
+          {
+            key: 'marks',
+            header: 'Marks',
+            sortKey: 'marks',
+            align: 'right',
+            render: (row) => row.marks.toFixed(1),
+          },
+          {
+            key: 'status',
+            header: 'Status',
+            sortKey: 'isActive',
+            render: (row) => <QuestionStatusChip isActive={row.isActive} />,
+          },
+          {
+            key: 'actions',
+            header: 'Actions',
+            render: (row) => (
+              <Box sx={{ display: 'flex', gap: 0.5 }}>
+                <Button
+                  size="small"
+                  startIcon={<Eye size={16} />}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    navigate(routePaths.questionDetails.replace(':questionId', row.id));
+                  }}
+                >
+                  View
+                </Button>
+                <Button
+                  size="small"
+                  startIcon={<Pencil size={16} />}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    navigate(routePaths.questionEdit.replace(':questionId', row.id));
+                  }}
+                >
+                  Edit
+                </Button>
+                <Button
+                  size="small"
+                  color="error"
+                  startIcon={<Trash2 size={16} />}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    navigate(routePaths.questionDetails.replace(':questionId', row.id));
+                  }}
+                >
+                  Delete
+                </Button>
+              </Box>
+            ),
+          },
+        ]}
+        pagination={{
+          page: query.pageNumber,
+          pageSize: query.pageSize,
+          totalCount: questionsQuery.data?.totalCount ?? 0,
+          onPageChange: setPage,
+          onPageSizeChange: setPageSize,
+          pageSizeOptions: [10, 25, 50],
+        }}
+        sorting={{
+          sortBy: query.sortBy,
+          sortDirection: query.sortDirection,
+          onSortChange: (sortBy, sortDirection) => setFilters({ sortBy, sortDirection }),
+        }}
+        toolbar={
+          <QuestionListToolbar
+            search={query.search ?? ''}
+            status={query.status ?? 'all'}
+            type={query.type ?? 'all'}
+            subjectId={query.subjectId}
+            chapterId={query.chapterId}
+            teacherId={query.teacherId}
+            difficultyId={query.difficultyId}
+            subjects={subjectsQuery.data ?? []}
+            chapters={chaptersQuery.data ?? []}
+            teachers={teachersQuery.data ?? []}
+            difficulties={difficultiesQuery.data ?? []}
+            onSearchChange={setSearch}
+            onFilterChange={(name, value) => {
+              if (name === 'subjectId') {
+                setFilters({ subjectId: value || undefined, chapterId: undefined });
+                return;
+              }
+
+              if (name === 'status') {
+                setFilters({ status: (value as 'all' | 'active' | 'inactive') || 'all' });
+                return;
+              }
+
+              if (name === 'type') {
+                setFilters({ type: (value as 'all' | 'MultipleChoice' | 'ShortQuestion' | 'LongQuestion' | 'FillInTheBlank' | 'TrueFalse') || 'all' });
+                return;
+              }
+
+              if (name === 'chapterId') {
+                setFilters({ chapterId: value || undefined });
+                return;
+              }
+
+              if (name === 'teacherId') {
+                setFilters({ teacherId: value || undefined });
+                return;
+              }
+
+              if (name === 'difficultyId') {
+                setFilters({ difficultyId: value || undefined });
+              }
+            }}
+            onClearFilters={clearFilters}
+          />
+        }
+        onRowClick={(row) => navigate(routePaths.questionDetails.replace(':questionId', row.id))}
+      />
     </PageContainer>
   );
 }
-
