@@ -5,6 +5,8 @@ import { ProtectedRoute, PublicRoute, RouteFallback } from './guards';
 import { DashboardPage } from '../../features/dashboard/pages/DashboardPage';
 import { TeachersPage } from '../../features/teachers/pages/TeachersPage';
 import { SubjectsPage } from '../../features/subjects/pages/SubjectsPage';
+import { SubjectCreatePage } from '../../features/subjects/pages/SubjectCreatePage';
+import { SubjectEditPage } from '../../features/subjects/pages/SubjectEditPage';
 import { ClassesPage } from '../../features/classes/pages/ClassesPage';
 import { ChaptersPage } from '../../features/chapters/pages/ChaptersPage';
 import { DifficultyLevelsPage } from '../../features/difficultyLevels/pages/DifficultyLevelsPage';
@@ -58,6 +60,8 @@ const router = createBrowserRouter([
       { index: true, element: <DashboardPage /> },
       { path: routePaths.teachers.slice(1), element: <TeachersPage /> },
       { path: routePaths.subjects.slice(1), element: <SubjectsPage /> },
+      { path: routePaths.subjectCreate.slice(1), element: <SubjectCreatePage /> },
+      { path: routePaths.subjectEdit.slice(1), element: <SubjectEditPage /> },
       { path: routePaths.classes.slice(1), element: <ClassesPage /> },
       { path: routePaths.chapters.slice(1), element: <ChaptersPage /> },
       { path: routePaths.difficultyLevels.slice(1), element: <DifficultyLevelsPage /> },

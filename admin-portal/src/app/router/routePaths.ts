@@ -6,6 +6,8 @@ export const routePaths = {
   questionCreate: '/questions/new',
   questionDetails: '/questions/:questionId',
   questionEdit: '/questions/:questionId/edit',
+  subjectCreate: '/subjects/new',
+  subjectEdit: '/subjects/:subjectId/edit',
   teachers: '/teachers',
   subjects: '/subjects',
   classes: '/classes',
