@@ -6,6 +6,7 @@ import { TeachersPage } from '../../features/teachers/pages/TeachersPage';
 import { SubjectsPage } from '../../features/subjects/pages/SubjectsPage';
 import { ClassesPage } from '../../features/classes/pages/ClassesPage';
 import { ChaptersPage } from '../../features/chapters/pages/ChaptersPage';
+import { DifficultyLevelsPage } from '../../features/difficultyLevels/pages/DifficultyLevelsPage';
 import { QuestionCategoriesPage } from '../../features/questionCategories/pages/QuestionCategoriesPage';
 import { QuestionsPage } from '../../features/questions/pages/QuestionsPage';
 import { PapersPage } from '../../features/papers/pages/PapersPage';
@@ -24,6 +25,7 @@ const router = createBrowserRouter([
       { path: routePaths.subjects.slice(1), element: <SubjectsPage /> },
       { path: routePaths.classes.slice(1), element: <ClassesPage /> },
       { path: routePaths.chapters.slice(1), element: <ChaptersPage /> },
+      { path: routePaths.difficultyLevels.slice(1), element: <DifficultyLevelsPage /> },
       { path: routePaths.questionCategories.slice(1), element: <QuestionCategoriesPage /> },
       { path: routePaths.questions.slice(1), element: <QuestionsPage /> },
       { path: routePaths.papers.slice(1), element: <PapersPage /> },
@@ -42,4 +44,3 @@ const router = createBrowserRouter([
 export function AppRouter() {
   return <RouterProvider router={router} />;
 }
-

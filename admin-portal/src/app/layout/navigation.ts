@@ -3,35 +3,109 @@ import {
   BarChart3,
   BookOpen,
   Building2,
-  Layers3,
+  FileText,
   LayoutDashboard,
   RefreshCw,
   Settings2,
   Shield,
-  Tags,
+  SlidersHorizontal,
   Users,
-  FileText,
+  Layers3,
 } from 'lucide-react';
 import { routePaths } from '../router/routePaths';
 
-export type NavigationItem = {
+export type BreadcrumbItem = {
+  label: string;
+  path: string;
+};
+
+export type SidebarLink = {
   label: string;
   path: string;
   icon: LucideIcon;
 };
 
-export const navigationItems: NavigationItem[] = [
+export type SidebarGroup = {
+  label: string;
+  icon: LucideIcon;
+  items: SidebarLink[];
+};
+
+export type SidebarEntry = SidebarLink | SidebarGroup;
+
+export const sidebarNavigation: SidebarEntry[] = [
   { label: 'Dashboard', path: routePaths.dashboard, icon: LayoutDashboard },
+  {
+    label: 'Question Bank',
+    icon: BookOpen,
+    items: [
+      { label: 'Questions', path: routePaths.questions, icon: FileText },
+      { label: 'Subjects', path: routePaths.subjects, icon: BookOpen },
+      { label: 'Chapters', path: routePaths.chapters, icon: Layers3 },
+      { label: 'Difficulty Levels', path: routePaths.difficultyLevels, icon: SlidersHorizontal },
+    ],
+  },
+  { label: 'Paper Generator', path: routePaths.papers, icon: FileText },
   { label: 'Teachers', path: routePaths.teachers, icon: Users },
-  { label: 'Subjects', path: routePaths.subjects, icon: BookOpen },
   { label: 'Classes', path: routePaths.classes, icon: Building2 },
-  { label: 'Chapters', path: routePaths.chapters, icon: Layers3 },
-  { label: 'Question Categories', path: routePaths.questionCategories, icon: Tags },
-  { label: 'Question Bank', path: routePaths.questions, icon: FileText },
-  { label: 'Exam Papers', path: routePaths.papers, icon: FileText },
-  { label: 'Synchronization', path: routePaths.sync, icon: RefreshCw },
-  { label: 'Users & Permissions', path: routePaths.users, icon: Shield },
   { label: 'Reports', path: routePaths.reports, icon: BarChart3 },
   { label: 'Settings', path: routePaths.settings, icon: Settings2 },
+  { label: 'User Management', path: routePaths.users, icon: Shield },
+  { label: 'Sync Status', path: routePaths.sync, icon: RefreshCw },
 ];
 
+const breadcrumbMap: Record<string, BreadcrumbItem[]> = {
+  [routePaths.dashboard]: [{ label: 'Dashboard', path: routePaths.dashboard }],
+  [routePaths.questions]: [
+    { label: 'Dashboard', path: routePaths.dashboard },
+    { label: 'Question Bank', path: routePaths.questions },
+    { label: 'Questions', path: routePaths.questions },
+  ],
+  [routePaths.subjects]: [
+    { label: 'Dashboard', path: routePaths.dashboard },
+    { label: 'Question Bank', path: routePaths.subjects },
+    { label: 'Subjects', path: routePaths.subjects },
+  ],
+  [routePaths.chapters]: [
+    { label: 'Dashboard', path: routePaths.dashboard },
+    { label: 'Question Bank', path: routePaths.chapters },
+    { label: 'Chapters', path: routePaths.chapters },
+  ],
+  [routePaths.difficultyLevels]: [
+    { label: 'Dashboard', path: routePaths.dashboard },
+    { label: 'Question Bank', path: routePaths.difficultyLevels },
+    { label: 'Difficulty Levels', path: routePaths.difficultyLevels },
+  ],
+  [routePaths.papers]: [
+    { label: 'Dashboard', path: routePaths.dashboard },
+    { label: 'Paper Generator', path: routePaths.papers },
+  ],
+  [routePaths.teachers]: [
+    { label: 'Dashboard', path: routePaths.dashboard },
+    { label: 'Teachers', path: routePaths.teachers },
+  ],
+  [routePaths.classes]: [
+    { label: 'Dashboard', path: routePaths.dashboard },
+    { label: 'Classes', path: routePaths.classes },
+  ],
+  [routePaths.reports]: [
+    { label: 'Dashboard', path: routePaths.dashboard },
+    { label: 'Reports', path: routePaths.reports },
+  ],
+  [routePaths.settings]: [
+    { label: 'Dashboard', path: routePaths.dashboard },
+    { label: 'Settings', path: routePaths.settings },
+  ],
+  [routePaths.users]: [
+    { label: 'Dashboard', path: routePaths.dashboard },
+    { label: 'User Management', path: routePaths.users },
+  ],
+  [routePaths.sync]: [
+    { label: 'Dashboard', path: routePaths.dashboard },
+    { label: 'Sync Status', path: routePaths.sync },
+  ],
+};
+
+export function getBreadcrumbsForPath(pathname: string): BreadcrumbItem[] {
+  return breadcrumbMap[pathname] ?? [{ label: 'Dashboard', path: routePaths.dashboard }];
+}

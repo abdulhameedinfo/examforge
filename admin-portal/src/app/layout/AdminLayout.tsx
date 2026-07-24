@@ -1,107 +1,58 @@
-import {
-  AppBar,
-  Box,
-  Divider,
-  Drawer,
-  IconButton,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Toolbar,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
-import { Menu, MoonStar, SunMedium } from 'lucide-react';
-import { Link as RouterLink, Outlet, useLocation } from 'react-router-dom';
-import { appEnv } from '../config/env';
-import { navigationItems } from './navigation';
+import { Box, useMediaQuery, useTheme } from '@mui/material';
+import { Outlet, useLocation } from 'react-router-dom';
+import { AppBreadcrumbs } from './components/AppBreadcrumbs';
+import { AppSidebar, SIDEBAR_COLLAPSED_WIDTH, SIDEBAR_WIDTH } from './components/AppSidebar';
+import { AppTopBar } from './components/AppTopBar';
+import { getBreadcrumbsForPath } from './navigation';
 import { useUiStore } from '../state/useUiStore';
-
-const drawerWidth = 280;
 
 export function AdminLayout() {
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
   const location = useLocation();
-  const mode = useUiStore((state) => state.mode);
-  const toggleMode = useUiStore((state) => state.toggleMode);
   const sidebarOpen = useUiStore((state) => state.sidebarOpen);
+  const sidebarCollapsed = useUiStore((state) => state.sidebarCollapsed);
   const setSidebarOpen = useUiStore((state) => state.setSidebarOpen);
-  const mobileOpen = sidebarOpen && !isDesktop;
+  const toggleSidebarCollapsed = useUiStore((state) => state.toggleSidebarCollapsed);
 
-  const drawerContent = (
-    <Box sx={{ display: 'flex', height: '100%', flexDirection: 'column' }}>
-      <Toolbar sx={{ px: 2 }}>
-        <Typography component={RouterLink} to="/" variant="h6" sx={{ color: 'inherit', textDecoration: 'none' }}>
-          {appEnv.appName}
-        </Typography>
-      </Toolbar>
-      <Divider />
-      <List sx={{ px: 1, py: 1 }}>
-        {navigationItems.map((item) => {
-          const Icon = item.icon;
-
-          return (
-            <ListItemButton
-              key={item.path}
-              component={RouterLink}
-              to={item.path}
-              selected={item.path === '/' ? location.pathname === '/' : location.pathname.startsWith(item.path)}
-              sx={{
-                borderRadius: 1,
-                mb: 0.5,
-                '&.Mui-selected': {
-                  bgcolor: 'action.selected',
-                },
-              }}
-            >
-              <ListItemIcon sx={{ minWidth: 40 }}>
-                <Icon size={18} />
-              </ListItemIcon>
-              <ListItemText primary={item.label} />
-            </ListItemButton>
-          );
-        })}
-      </List>
-    </Box>
-  );
+  const breadcrumbs = getBreadcrumbsForPath(location.pathname);
+  const pageTitle = breadcrumbs[breadcrumbs.length - 1]?.label ?? 'Dashboard';
+  const sidebarWidth = isDesktop && sidebarCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH;
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      <AppBar position="fixed" color="inherit" sx={{ ml: isDesktop ? `${drawerWidth}px` : 0, width: isDesktop ? `calc(100% - ${drawerWidth}px)` : '100%' }}>
-        <Toolbar sx={{ gap: 1.5 }}>
-          {!isDesktop ? (
-            <IconButton edge="start" onClick={() => setSidebarOpen(true)} aria-label="Open navigation">
-              <Menu size={18} />
-            </IconButton>
-          ) : null}
-          <Typography variant="h6" sx={{ flex: 1 }}>
-            Admin Portal
-          </Typography>
-          <IconButton onClick={toggleMode} aria-label="Toggle color mode">
-            {mode === 'light' ? <MoonStar size={18} /> : <SunMedium size={18} />}
-          </IconButton>
-        </Toolbar>
-      </AppBar>
+    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
+      <AppSidebar
+        isDesktop={isDesktop}
+        open={sidebarOpen}
+        collapsed={sidebarCollapsed}
+        onClose={() => setSidebarOpen(false)}
+      />
 
-      <Box component="nav" sx={{ width: { lg: drawerWidth }, flexShrink: { lg: 0 } }} aria-label="Main navigation">
-        <Drawer
-          variant={isDesktop ? 'permanent' : 'temporary'}
-          open={isDesktop ? true : mobileOpen}
-          onClose={() => setSidebarOpen(false)}
-          ModalProps={{ keepMounted: true }}
-          sx={{
-            '& .MuiDrawer-paper': { width: drawerWidth, boxSizing: 'border-box' },
-          }}
-        >
-          {drawerContent}
-        </Drawer>
-      </Box>
+      <AppTopBar
+        title={pageTitle}
+        isDesktop={isDesktop}
+        sidebarCollapsed={sidebarCollapsed}
+        sidebarWidth={sidebarWidth}
+        onOpenSidebar={() => setSidebarOpen(true)}
+        onToggleSidebarCollapse={toggleSidebarCollapsed}
+      />
 
-      <Box component="main" sx={{ flexGrow: 1, pt: 10, px: { xs: 2, sm: 3 }, pb: 3 }}>
-        <Outlet />
+      <Box
+        component="main"
+        sx={{
+          flex: 1,
+          minWidth: 0,
+          pt: 11,
+          ml: { lg: `${sidebarWidth}px` },
+          transition: theme.transitions.create(['margin-left', 'width'], {
+            duration: theme.transitions.duration.shorter,
+          }),
+        }}
+      >
+        <Box sx={{ px: { xs: 2, sm: 3, lg: 4 }, pb: 3 }}>
+          <AppBreadcrumbs items={breadcrumbs} />
+          <Outlet />
+        </Box>
       </Box>
     </Box>
   );

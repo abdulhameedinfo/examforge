@@ -4,6 +4,7 @@ export const routePaths = {
   subjects: '/subjects',
   classes: '/classes',
   chapters: '/chapters',
+  difficultyLevels: '/difficulty-levels',
   questionCategories: '/question-categories',
   questions: '/questions',
   papers: '/papers',
@@ -12,4 +13,3 @@ export const routePaths = {
   reports: '/reports',
   settings: '/settings',
 } as const;
-
