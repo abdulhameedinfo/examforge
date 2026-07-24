@@ -5,12 +5,13 @@ import {
   getChapterOptions,
   getDifficultyOptions,
   getQuestion,
+  getQuestionStatistics,
   getQuestions,
   getSubjectOptions,
   getTeacherOptions,
   updateQuestion,
 } from '../api/questionApi';
-import type { QuestionListQuery, QuestionUpsertPayload } from '../types';
+import type { QuestionListQuery, QuestionStatistics, QuestionUpsertPayload } from '../types';
 
 export const questionQueryKeys = {
   all: ['questions'] as const,
@@ -20,6 +21,7 @@ export const questionQueryKeys = {
   chapters: (subjectId?: string) => [...questionQueryKeys.all, 'chapters', subjectId ?? 'all'] as const,
   difficulties: () => [...questionQueryKeys.all, 'difficulties'] as const,
   teachers: () => [...questionQueryKeys.all, 'teachers'] as const,
+  statistics: () => [...questionQueryKeys.all, 'statistics'] as const,
 };
 
 export function useQuestionsQuery(query: QuestionListQuery) {
@@ -104,5 +106,13 @@ export function useDeleteQuestionMutation() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: questionQueryKeys.all });
     },
+  });
+}
+
+export function useQuestionStatisticsQuery() {
+  return useQuery({
+    queryKey: questionQueryKeys.statistics(),
+    queryFn: getQuestionStatistics,
+    staleTime: 5 * 60 * 1000,
   });
 }

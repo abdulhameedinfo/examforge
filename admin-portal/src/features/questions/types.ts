@@ -98,3 +98,13 @@ export type QuestionFormValues = {
   blankAnswers: string[];
 };
 
+export type QuestionStatistics = {
+  totalQuestions: number;
+  activeQuestions: number;
+  inactiveQuestions: number;
+  totalByType: Record<string, number>;
+  totalByDifficulty: Record<string, number>;
+  totalBySubject: Record<string, number>;
+  averageMarks: number;
+};
+

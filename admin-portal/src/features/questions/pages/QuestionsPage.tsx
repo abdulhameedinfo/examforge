@@ -1,23 +1,56 @@
-import { Alert, Box, Button, Stack, Typography } from '@mui/material';
-import { Eye, Pencil, Trash2 } from 'lucide-react';
+import { Alert, Box, Button, Snackbar, Stack, Typography } from '@mui/material';
+import { Copy, Eye, Pencil, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DataTable } from '../../../shared/components/data-table/DataTable';
 import { PageContainer } from '../../../shared/components/PageContainer';
 import { SectionHeader } from '../../../shared/components/SectionHeader';
 import { routePaths } from '../../../app/router/routePaths';
 import { QuestionListToolbar } from '../components/QuestionListToolbar';
+import { QuestionPreviewDialog } from '../components/QuestionPreviewDialog';
+import { QuestionStatisticsCards } from '../components/QuestionStatisticsCards';
 import { QuestionStatusChip } from '../components/QuestionStatusChip';
 import { QuestionTypeChip } from '../components/QuestionTypeChip';
-import { useQuestionFormOptions, useQuestionsQuery } from '../hooks/useQuestionQueries';
+import { useQuestionFormOptions, useQuestionQuery, useQuestionStatisticsQuery, useQuestionsQuery } from '../hooks/useQuestionQueries';
 import { useQuestionListParams } from '../hooks/useQuestionListParams';
+import { copyQuestionToClipboard } from '../utils/copyQuestion';
 
 export function QuestionsPage() {
   const navigate = useNavigate();
   const { query, setPage, setPageSize, setSearch, setFilters, clearFilters } = useQuestionListParams();
   const questionsQuery = useQuestionsQuery(query);
   const { subjectsQuery, chaptersQuery, difficultiesQuery, teachersQuery } = useQuestionFormOptions(query.subjectId);
+  const statisticsQuery = useQuestionStatisticsQuery();
+
+  const [previewQuestionId, setPreviewQuestionId] = useState<string | null>(null);
+  const [copySuccess, setCopySuccess] = useState(false);
+  const [copyError, setCopyError] = useState(false);
 
   const rows = questionsQuery.data?.items ?? [];
+  const previewQuestionQuery = useQuestionQuery(previewQuestionId ?? undefined);
+
+  const handlePreview = (questionId: string) => {
+    setPreviewQuestionId(questionId);
+  };
+
+  const handleCopy = async (questionId: string) => {
+    const question = rows.find((r) => r.id === questionId);
+    if (!question) return;
+
+    try {
+      const questionDetail = await previewQuestionQuery.refetch().then((res) => res.data);
+      if (questionDetail) {
+        const success = await copyQuestionToClipboard(questionDetail);
+        if (success) {
+          setCopySuccess(true);
+        } else {
+          setCopyError(true);
+        }
+      }
+    } catch (error) {
+      setCopyError(true);
+    }
+  };
 
   return (
     <PageContainer>
@@ -31,27 +64,34 @@ export function QuestionsPage() {
         }
       />
 
-      {questionsQuery.error ? (
-        <Alert severity="error">Unable to load questions right now.</Alert>
-      ) : null}
+      <Stack spacing={3}>
+        <QuestionStatisticsCards statistics={statisticsQuery.data} loading={statisticsQuery.isLoading} />
 
-      <DataTable
-        rows={rows}
-        rowKey={(row) => row.id}
-        loading={questionsQuery.isFetching}
-        emptyTitle="No questions found"
-        emptyDescription="Try changing the search or filters."
-        columns={[
-          {
-            key: 'text',
-            header: 'Question',
-            sortKey: 'text',
-            width: '30%',
-            render: (row) => (
-              <Stack spacing={0.5}>
-                <Typography variant="body2" fontWeight={600} noWrap>
-                  {row.text}
-                </Typography>
+        {statisticsQuery.error ? (
+          <Alert severity="warning">Unable to load question statistics right now.</Alert>
+        ) : null}
+
+        {questionsQuery.error ? (
+          <Alert severity="error">Unable to load questions right now.</Alert>
+        ) : null}
+
+        <DataTable
+          rows={rows}
+          rowKey={(row) => row.id}
+          loading={questionsQuery.isFetching}
+          emptyTitle="No questions found"
+          emptyDescription="Try changing the search or filters."
+          columns={[
+            {
+              key: 'text',
+              header: 'Question',
+              sortKey: 'text',
+              width: '30%',
+              render: (row) => (
+                <Stack spacing={0.5}>
+                  <Typography variant="body2" fontWeight={600} noWrap>
+                    {row.text}
+                  </Typography>
                 <Typography variant="caption" color="text.secondary">
                   Updated {new Date(row.updatedAt).toLocaleDateString()}
                 </Typography>
@@ -111,10 +151,20 @@ export function QuestionsPage() {
                   startIcon={<Eye size={16} />}
                   onClick={(event) => {
                     event.stopPropagation();
-                    navigate(routePaths.questionDetails.replace(':questionId', row.id));
+                    handlePreview(row.id);
                   }}
                 >
-                  View
+                  Preview
+                </Button>
+                <Button
+                  size="small"
+                  startIcon={<Copy size={16} />}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleCopy(row.id);
+                  }}
+                >
+                  Copy
                 </Button>
                 <Button
                   size="small"
@@ -202,6 +252,27 @@ export function QuestionsPage() {
           />
         }
         onRowClick={(row) => navigate(routePaths.questionDetails.replace(':questionId', row.id))}
+      />
+      </Stack>
+
+      <QuestionPreviewDialog
+        question={previewQuestionQuery.data ?? null}
+        open={Boolean(previewQuestionId)}
+        onClose={() => setPreviewQuestionId(null)}
+      />
+
+      <Snackbar
+        open={copySuccess}
+        autoHideDuration={3000}
+        onClose={() => setCopySuccess(false)}
+        message="Question copied to clipboard"
+      />
+
+      <Snackbar
+        open={copyError}
+        autoHideDuration={3000}
+        onClose={() => setCopyError(false)}
+        message="Failed to copy question"
       />
     </PageContainer>
   );

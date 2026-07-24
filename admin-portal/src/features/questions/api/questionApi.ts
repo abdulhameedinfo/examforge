@@ -5,6 +5,7 @@ import type {
   QuestionDetail,
   QuestionListItem,
   QuestionListQuery,
+  QuestionStatistics,
   QuestionUpsertPayload,
   TeacherSummary,
 } from '../types';
@@ -67,4 +68,9 @@ export async function getTeacherOptions() {
   });
 
   return response.data.items;
+}
+
+export async function getQuestionStatistics() {
+  const response = await apiClient.get<QuestionStatistics>('/questions/statistics');
+  return response.data;
 }
