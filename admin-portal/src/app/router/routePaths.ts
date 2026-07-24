@@ -3,6 +3,8 @@ export const routePaths = {
   login: '/login',
   forgotPassword: '/forgot-password',
   resetPassword: '/reset-password/:token',
+  teacherCreate: '/teachers/new',
+  teacherEdit: '/teachers/:teacherId/edit',
   questionCreate: '/questions/new',
   questionDetails: '/questions/:questionId',
   questionEdit: '/questions/:questionId/edit',

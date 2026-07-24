@@ -4,6 +4,8 @@ import { routePaths } from './routePaths';
 import { ProtectedRoute, PublicRoute, RouteFallback } from './guards';
 import { DashboardPage } from '../../features/dashboard/pages/DashboardPage';
 import { TeachersPage } from '../../features/teachers/pages/TeachersPage';
+import { TeacherCreatePage } from '../../features/teachers/pages/TeacherCreatePage';
+import { TeacherEditPage } from '../../features/teachers/pages/TeacherEditPage';
 import { SubjectsPage } from '../../features/subjects/pages/SubjectsPage';
 import { SubjectCreatePage } from '../../features/subjects/pages/SubjectCreatePage';
 import { SubjectEditPage } from '../../features/subjects/pages/SubjectEditPage';
@@ -59,6 +61,8 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <DashboardPage /> },
       { path: routePaths.teachers.slice(1), element: <TeachersPage /> },
+      { path: routePaths.teacherCreate.slice(1), element: <TeacherCreatePage /> },
+      { path: routePaths.teacherEdit.slice(1), element: <TeacherEditPage /> },
       { path: routePaths.subjects.slice(1), element: <SubjectsPage /> },
       { path: routePaths.subjectCreate.slice(1), element: <SubjectCreatePage /> },
       { path: routePaths.subjectEdit.slice(1), element: <SubjectEditPage /> },

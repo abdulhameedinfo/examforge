@@ -95,6 +95,11 @@ const breadcrumbMap: Record<string, BreadcrumbItem[]> = {
     { label: 'Dashboard', path: routePaths.dashboard },
     { label: 'Teachers', path: routePaths.teachers },
   ],
+  [routePaths.teacherCreate]: [
+    { label: 'Dashboard', path: routePaths.dashboard },
+    { label: 'Teachers', path: routePaths.teachers },
+    { label: 'Create Teacher', path: routePaths.teacherCreate },
+  ],
   [routePaths.classes]: [
     { label: 'Dashboard', path: routePaths.dashboard },
     { label: 'Classes', path: routePaths.classes },
@@ -141,6 +146,14 @@ export function getBreadcrumbsForPath(pathname: string): BreadcrumbItem[] {
         { label: 'Dashboard', path: routePaths.dashboard },
         { label: 'Question Bank', path: routePaths.questions },
         { label: 'Question Details', path: routePaths.questions },
+      ],
+    },
+    {
+      pattern: routePaths.teacherEdit,
+      breadcrumbs: [
+        { label: 'Dashboard', path: routePaths.dashboard },
+        { label: 'Teachers', path: routePaths.teachers },
+        { label: 'Edit Teacher', path: routePaths.teachers },
       ],
     },
   ];
