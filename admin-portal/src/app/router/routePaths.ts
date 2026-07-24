@@ -18,6 +18,7 @@ export const routePaths = {
   questionCategories: '/question-categories',
   questions: '/questions',
   papers: '/papers',
+  examPaperGenerator: '/papers/generate',
   sync: '/sync',
   users: '/users',
   reports: '/reports',

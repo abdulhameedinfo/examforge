@@ -116,7 +116,7 @@ export function TeacherForm({
               render={({ field }) => (
                 <MultiSelectField
                   label="Assigned Subjects"
-                  value={field.value}
+                  value={field.value ?? []}
                   options={subjects.map((subject) => ({
                     value: subject.id,
                     label: subject.name,
@@ -137,7 +137,7 @@ export function TeacherForm({
               render={({ field }) => (
                 <MultiSelectField
                   label="Assigned Classes"
-                  value={field.value}
+                  value={field.value ?? []}
                   options={classes.map((item) => ({
                     value: item.id,
                     label: item.name,

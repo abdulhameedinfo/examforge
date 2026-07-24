@@ -18,6 +18,7 @@ import { QuestionCreatePage } from '../../features/questions/pages/QuestionCreat
 import { QuestionDetailsPage } from '../../features/questions/pages/QuestionDetailsPage';
 import { QuestionEditPage } from '../../features/questions/pages/QuestionEditPage';
 import { PapersPage } from '../../features/papers/pages/PapersPage';
+import { ExamPaperGeneratorPage } from '../../features/papers/pages/ExamPaperGeneratorPage';
 import { SyncPage } from '../../features/sync/pages/SyncPage';
 import { UsersPage } from '../../features/users/pages/UsersPage';
 import { ReportsPage } from '../../features/reports/pages/ReportsPage';
@@ -75,6 +76,7 @@ const router = createBrowserRouter([
       { path: routePaths.questionDetails.slice(1), element: <QuestionDetailsPage /> },
       { path: routePaths.questionEdit.slice(1), element: <QuestionEditPage /> },
       { path: routePaths.papers.slice(1), element: <PapersPage /> },
+      { path: routePaths.examPaperGenerator.slice(1), element: <ExamPaperGeneratorPage /> },
       { path: routePaths.sync.slice(1), element: <SyncPage /> },
       { path: routePaths.users.slice(1), element: <UsersPage /> },
       { path: routePaths.reports.slice(1), element: <ReportsPage /> },

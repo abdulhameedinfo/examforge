@@ -1,4 +1,4 @@
-import type { IdNameDto } from '../../../shared/api/types';
+import type { IdNameDto } from '../../shared/api/types';
 
 export type TeacherStatusValue = 'all' | 'active' | 'inactive';
 
