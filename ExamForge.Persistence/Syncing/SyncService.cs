@@ -6,6 +6,7 @@ using ExamForge.Domain.Common;
 using ExamForge.Domain.Entities;
 using ExamForge.Domain.Enums;
 using ExamForge.Domain.Exceptions;
+using ExamForge.Domain.ValueObjects;
 using ExamForge.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 
@@ -507,7 +508,7 @@ public sealed class SyncService : ISyncService
         string operation,
         CancellationToken cancellationToken)
     {
-        var payload = entity switch
+        object payload = entity switch
         {
             Subject subject => CreateSubjectPayload(subject),
             Question question => CreateQuestionPayload(question),
@@ -533,7 +534,7 @@ public sealed class SyncService : ISyncService
         BaseEntity entity,
         string entityName)
     {
-        var payload = entity switch
+        object payload = entity switch
         {
             Subject subject => CreateSubjectPayload(subject),
             Question question => CreateQuestionPayload(question),
@@ -552,7 +553,7 @@ public sealed class SyncService : ISyncService
 
     private static SyncUploadItemResult Conflict(BaseEntity entity, SyncChangeDto change)
     {
-        var payload = entity switch
+        object payload = entity switch
         {
             Subject subject => CreateSubjectPayload(subject),
             Question question => CreateQuestionPayload(question),
@@ -583,7 +584,7 @@ public sealed class SyncService : ISyncService
 
     private static SyncChangeDto ToChangeDto(SyncChangeLogEntry entry)
     {
-        var data = string.IsNullOrWhiteSpace(entry.PayloadJson)
+        JsonElement? data = string.IsNullOrWhiteSpace(entry.PayloadJson)
             ? null
             : JsonSerializer.Deserialize<JsonElement>(entry.PayloadJson, JsonOptions);
 

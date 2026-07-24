@@ -1,4 +1,5 @@
 using System.Globalization;
+using ExamForge.Application.PaperGeneration.Dtos;
 using ExamForge.Application.PaperGeneration.Pdf;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
