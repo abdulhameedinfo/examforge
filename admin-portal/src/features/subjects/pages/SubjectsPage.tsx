@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { routePaths } from '../../../app/router/routePaths';
 import { PageContainer } from '../../../shared/components/PageContainer';
 import { SectionHeader } from '../../../shared/components/SectionHeader';
-import { DataTable } from '../../../shared/components/data-table/DataTable';
+import { AppTable } from '../../../shared/components/ui/AppTable';
 import { SubjectListToolbar } from '../components/SubjectListToolbar';
 import { useDeleteSubjectMutation, useSubjectsQuery } from '../hooks/useSubjectQueries';
 import { useSubjectListParams } from '../hooks/useSubjectListParams';
@@ -43,7 +43,7 @@ export function SubjectsPage() {
 
       {subjectsQuery.error ? <Alert severity="error">Unable to load subjects right now.</Alert> : null}
 
-      <DataTable
+      <AppTable
         rows={rows}
         rowKey={(row) => row.id}
         loading={subjectsQuery.isFetching}

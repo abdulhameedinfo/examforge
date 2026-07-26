@@ -2,7 +2,7 @@ import { Alert, Box, Button, Snackbar, Stack, Typography } from '@mui/material';
 import { Copy, Eye, Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DataTable } from '../../../shared/components/data-table/DataTable';
+import { AppTable } from '../../../shared/components/ui/AppTable';
 import { PageContainer } from '../../../shared/components/PageContainer';
 import { SectionHeader } from '../../../shared/components/SectionHeader';
 import { routePaths } from '../../../app/router/routePaths';
@@ -75,7 +75,7 @@ export function QuestionsPage() {
           <Alert severity="error">Unable to load questions right now.</Alert>
         ) : null}
 
-        <DataTable
+        <AppTable
           rows={rows}
           rowKey={(row) => row.id}
           loading={questionsQuery.isFetching}

@@ -1,205 +1,171 @@
 import {
+  Box,
+  Paper,
+  Skeleton,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TableRow,
   TablePagination,
-  Paper,
-  Box,
-  Typography,
-  Checkbox,
+  TableRow,
   TableSortLabel,
+  Typography,
 } from '@mui/material';
 import type { ReactNode } from 'react';
+import { memo } from 'react';
 
-export interface TableColumn<T = unknown> {
+export type AppTableColumn<TItem> = {
   key: string;
   header: string;
-  render?: (row: T, index: number) => ReactNode;
-  width?: string | number;
-  align?: 'left' | 'center' | 'right';
-  sortable?: boolean;
+  render: (item: TItem) => ReactNode;
   sortKey?: string;
-}
+  align?: 'left' | 'center' | 'right';
+  width?: number | string;
+};
 
-export interface AppTableProps<T = unknown> {
-  columns: TableColumn<T>[];
-  rows: T[];
-  rowKey?: (row: T) => string;
-  loading?: boolean;
-  empty?: boolean;
-  emptyTitle?: string;
-  emptyDescription?: string;
-  selectable?: boolean;
-  selectedRows?: string[];
-  onRowSelect?: (rowId: string) => void;
-  onRowClick?: (row: T) => void;
-  onSortChange?: (sortKey: string, direction: 'asc' | 'desc') => void;
+export type AppTablePagination = {
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  pageSizeOptions?: number[];
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (pageSize: number) => void;
+};
+
+export type AppTableSorting = {
   sortBy?: string;
   sortDirection?: 'asc' | 'desc';
-  pagination?: {
-    page: number;
-    pageSize: number;
-    totalCount: number;
-    onPageChange: (page: number) => void;
-    onPageSizeChange: (pageSize: number) => void;
-    pageSizeOptions?: number[];
-  };
-}
+  onSortChange: (sortBy: string, sortDirection: 'asc' | 'desc') => void;
+};
 
-export function AppTable<T = unknown>({
+type AppTableProps<TItem> = {
+  columns: AppTableColumn<TItem>[];
+  rows: TItem[];
+  rowKey: (item: TItem) => string;
+  loading?: boolean;
+  emptyTitle: string;
+  emptyDescription?: string;
+  onRowClick?: (item: TItem) => void;
+  pagination: AppTablePagination;
+  sorting?: AppTableSorting;
+  toolbar?: ReactNode;
+};
+
+export const AppTable = memo(function AppTable<TItem>({
   columns,
   rows,
-  rowKey = (_, index) => index.toString(),
+  rowKey,
   loading = false,
-  empty = false,
-  emptyTitle = 'No data available',
-  emptyDescription = 'There are no items to display',
-  selectable = false,
-  selectedRows = [],
-  onRowSelect,
+  emptyTitle,
+  emptyDescription,
   onRowClick,
-  onSortChange,
-  sortBy,
-  sortDirection,
   pagination,
-}: AppTableProps<T>) {
-  const handleSort = (column: TableColumn<T>) => {
-    if (!column.sortable || !column.sortKey || !onSortChange) return;
-    
-    const direction = sortBy === column.sortKey && sortDirection === 'asc' ? 'desc' : 'asc';
-    onSortChange(column.sortKey, direction);
+  sorting,
+  toolbar,
+}: AppTableProps<TItem>) {
+  const handleSortClick = (sortKey: string) => {
+    if (!sorting) {
+      return;
+    }
+
+    const nextDirection =
+      sorting.sortBy === sortKey && sorting.sortDirection === 'asc' ? 'desc' : 'asc';
+    sorting.onSortChange(sortKey, nextDirection);
   };
 
-  const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const allSelected = event.target.checked;
-    rows.forEach((row) => {
-      const id = rowKey(row, rows.indexOf(row));
-      if (allSelected && !selectedRows.includes(id)) {
-        onRowSelect?.(id);
-      } else if (!allSelected && selectedRows.includes(id)) {
-        onRowSelect?.(id);
-      }
-    });
-  };
-
-  const isAllSelected = rows.length > 0 && selectedRows.length === rows.length;
-  const isSomeSelected = selectedRows.length > 0 && selectedRows.length < rows.length;
-
-  if (empty && !loading) {
-    return (
-      <Box sx={{ p: 4, textAlign: 'center' }}>
-        <Typography variant="h6" color="text.secondary">
-          {emptyTitle}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {emptyDescription}
-        </Typography>
-      </Box>
-    );
-  }
+  const rowCount = rows.length;
 
   return (
-    <Box>
-      <TableContainer component={Paper}>
-        <Table>
+    <Paper variant="outlined" sx={{ overflow: 'hidden' }}>
+      {toolbar ? <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider' }}>{toolbar}</Box> : null}
+
+      <TableContainer>
+        <Table aria-label="Data table">
           <TableHead>
             <TableRow>
-              {selectable && (
-                <TableCell padding="checkbox">
-                  <Checkbox
-                    indeterminate={isSomeSelected}
-                    checked={isAllSelected}
-                    onChange={handleSelectAll}
-                  />
-                </TableCell>
-              )}
-              {columns.map((column) => (
-                <TableCell
-                  key={column.key}
-                  width={column.width}
-                  align={column.align || 'left'}
-                  sortDirection={sortBy === column.sortKey ? sortDirection : false}
-                >
-                  {column.sortable ? (
-                    <TableSortLabel
-                      active={sortBy === column.sortKey}
-                      direction={sortDirection || 'asc'}
-                      onClick={() => handleSort(column)}
-                    >
-                      {column.header}
-                    </TableSortLabel>
-                  ) : (
-                    column.header
-                  )}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={columns.length + (selectable ? 1 : 0)} align="center">
-                  <Typography color="text.secondary">Loading...</Typography>
-                </TableCell>
-              </TableRow>
-            ) : rows.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={columns.length + (selectable ? 1 : 0)} align="center">
-                  <Typography color="text.secondary">No data</Typography>
-                </TableCell>
-              </TableRow>
-            ) : (
-              rows.map((row, index) => {
-                const id = rowKey(row, index);
-                const isSelected = selectedRows.includes(id);
+              {columns.map((column) => {
+                const isSorted = sorting?.sortBy === column.sortKey;
+                const activeDirection = isSorted ? sorting?.sortDirection : false;
 
                 return (
-                  <TableRow
-                    key={id}
-                    hover
-                    selected={isSelected}
-                    onClick={() => onRowClick?.(row)}
-                    sx={{ cursor: onRowClick ? 'pointer' : 'default' }}
+                  <TableCell
+                    key={column.key}
+                    align={column.align ?? 'left'}
+                    sortDirection={isSorted ? sorting?.sortDirection : false}
+                    sx={{ width: column.width }}
                   >
-                    {selectable && (
-                      <TableCell padding="checkbox">
-                        <Checkbox
-                          checked={isSelected}
-                          onChange={() => onRowSelect?.(id)}
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                      </TableCell>
-                    )}
-                    {columns.map((column) => (
-                      <TableCell
-                        key={column.key}
-                        width={column.width}
-                        align={column.align || 'left'}
+                    {column.sortKey && sorting ? (
+                      <TableSortLabel
+                        active={isSorted}
+                        direction={activeDirection || 'asc'}
+                        onClick={() => handleSortClick(column.sortKey!)}
                       >
-                        {column.render ? column.render(row, index) : (row as any)[column.key]}
-                      </TableCell>
-                    ))}
-                  </TableRow>
+                        {column.header}
+                      </TableSortLabel>
+                    ) : (
+                      column.header
+                    )}
+                  </TableCell>
                 );
-              })
+              })}
+            </TableRow>
+          </TableHead>
+
+          <TableBody>
+            {loading ? (
+              Array.from({ length: 5 }).map((_, index) => (
+                <TableRow key={`skeleton-${index}`}>
+                  {columns.map((column) => (
+                    <TableCell key={column.key}>
+                      <Skeleton variant="text" width="80%" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : rowCount > 0 ? (
+              rows.map((row) => (
+                <TableRow
+                  key={rowKey(row)}
+                  hover={Boolean(onRowClick)}
+                  onClick={onRowClick ? () => onRowClick(row) : undefined}
+                  sx={onRowClick ? { cursor: 'pointer' } : undefined}
+                >
+                  {columns.map((column) => (
+                    <TableCell key={column.key} align={column.align ?? 'left'}>
+                      {column.render(row)}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} sx={{ py: 6 }}>
+                  <Box sx={{ textAlign: 'center' }}>
+                    <Typography variant="h6">{emptyTitle}</Typography>
+                    {emptyDescription ? (
+                      <Typography color="text.secondary" sx={{ mt: 1 }}>
+                        {emptyDescription}
+                      </Typography>
+                    ) : null}
+                  </Box>
+                </TableCell>
+              </TableRow>
             )}
           </TableBody>
         </Table>
       </TableContainer>
-      {pagination && (
-        <TablePagination
-          component="div"
-          count={pagination.totalCount}
-          page={pagination.page}
-          onPageChange={(_, page) => pagination.onPageChange(page)}
-          rowsPerPage={pagination.pageSize}
-          onRowsPerPageChange={(e) => pagination.onPageSizeChange(parseInt(e.target.value, 10))}
-          rowsPerPageOptions={pagination.pageSizeOptions || [10, 25, 50]}
-        />
-      )}
-    </Box>
+
+      <TablePagination
+        component="div"
+        count={pagination.totalCount}
+        page={Math.max(0, pagination.page - 1)}
+        onPageChange={(_, nextPage) => pagination.onPageChange(nextPage + 1)}
+        rowsPerPage={pagination.pageSize}
+        onRowsPerPageChange={(event) => pagination.onPageSizeChange(Number(event.target.value))}
+        rowsPerPageOptions={pagination.pageSizeOptions ?? [10, 25, 50]}
+      />
+    </Paper>
   );
-}
+});
+
